@@ -1,0 +1,8 @@
+[package]
+name = "cryptobox-store"
+version = "0.1.0"
+authors = ["Florian Gilcher <florian.gilcher@asquera.de>"]
+
+[dependencies]
+proteus    = { git = "https://github.com/wireapp/proteus", branch = "develop" }
+cbor-codec = ">= 0.7.0"

@@ -8,7 +8,7 @@ repository   = "git@github.com:wireapp/cryptobox.git"
 license      = "GPL-3.0"
 
 [dependencies]
-byteorder  = ">= 0.5.1"
-cbor-codec = ">= 0.7.0"
-proteus    = { git = "https://github.com/wireapp/proteus", branch = "develop" }
-
+byteorder           = ">= 0.5.1"
+proteus             = { git = "https://github.com/wireapp/proteus", branch = "develop" }
+cryptobox-store     = { path = "../cryptobox-store" }
+cryptobox-filestore = { path = "../cryptobox-filestore" }

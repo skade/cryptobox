@@ -17,7 +17,8 @@ name = "cryptobox"
 version = "1.0.0"
 dependencies = [
  "byteorder 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "cbor-codec 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cryptobox-filestore 0.1.0",
+ "cryptobox-store 0.1.0",
  "proteus 1.0.0 (git+https://github.com/wireapp/proteus?branch=develop)",
 ]
 
@@ -26,7 +27,25 @@ name = "cryptobox-c"
 version = "1.0.0"
 dependencies = [
  "cryptobox 1.0.0",
+ "cryptobox-filestore 0.1.0",
  "libc 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
+ "proteus 1.0.0 (git+https://github.com/wireapp/proteus?branch=develop)",
+]
+
+[[package]]
+name = "cryptobox-filestore"
+version = "0.1.0"
+dependencies = [
+ "byteorder 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cryptobox-store 0.1.0",
+ "proteus 1.0.0 (git+https://github.com/wireapp/proteus?branch=develop)",
+]
+
+[[package]]
+name = "cryptobox-store"
+version = "0.1.0"
+dependencies = [
+ "cbor-codec 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "proteus 1.0.0 (git+https://github.com/wireapp/proteus?branch=develop)",
 ]
 

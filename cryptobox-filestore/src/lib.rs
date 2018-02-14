@@ -13,8 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+extern crate byteorder;
+extern crate proteus;
+extern crate cryptobox_store;
+
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
-use identity::Identity;
 use proteus::{DecodeError, EncodeError};
 use proteus::keys::{PreKey, PreKeyId, IdentityKeyPair};
 use proteus::session::Session;
@@ -24,7 +27,8 @@ use std::fmt;
 use std::fs::{self, File};
 use std::io::{self, Read, Write, ErrorKind};
 use std::path::{Path, PathBuf};
-use super::*;
+use cryptobox_store::Store;
+use cryptobox_store::identity::Identity;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 struct Version(u16);

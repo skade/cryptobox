@@ -1,4 +1,4 @@
-// Copyright (C) 2015 Wire Swiss GmbH <support@wire.com>
+// Copyright (C) 2018 Wire Swiss GmbH <support@wire.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,12 +13,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+extern crate proteus;
+extern crate cbor;
+
+pub mod identity;
+
 use std::borrow::Borrow;
 use identity::Identity;
 use proteus::keys::{IdentityKeyPair, PreKey, PreKeyId};
 use proteus::session::Session;
-
-pub mod file;
 
 pub trait Store {
     type Error: ::std::error::Error;

@@ -9,9 +9,11 @@ license      = "GPL-3.0"
 
 [lib]
 name         = "cryptobox"
+doc          = false
 crate-type   = ["cdylib"]
 
 [dependencies]
-cryptobox = { path = "../cryptobox" }
-libc      = ">= 0.1.12"
-proteus   = { git = "https://github.com/wireapp/proteus", branch = "develop" }
+cryptobox           = { path = "../cryptobox" }
+cryptobox-filestore = { path = "../cryptobox-filestore" }
+libc                = ">= 0.1.12"
+proteus             = { git = "https://github.com/wireapp/proteus", branch = "develop" }

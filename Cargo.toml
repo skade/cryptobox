@@ -1,2 +1,2 @@
 [workspace]
-members = ["cryptobox", "cryptobox-c"]
+members = ["cryptobox", "cryptobox-store", "cryptobox-filestore", "cryptobox-c"]

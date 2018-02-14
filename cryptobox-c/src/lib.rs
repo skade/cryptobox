@@ -14,12 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern crate cryptobox;
+extern crate cryptobox_filestore;
+
 extern crate libc;
 extern crate proteus;
 
 use cryptobox::{CBox, CBoxError, CBoxSession, Identity, IdentityMode};
-use cryptobox::store::Store;
-use cryptobox::store::file::FileStore;
+use cryptobox::Store;
+use cryptobox_filestore::FileStore;
 use libc::{c_char, c_ushort, size_t, uint8_t, uint16_t};
 use proteus::{DecodeError, EncodeError};
 use proteus::keys::{self, PreKeyId, PreKeyBundle};

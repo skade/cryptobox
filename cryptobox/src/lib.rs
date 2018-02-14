@@ -14,11 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern crate byteorder;
-extern crate cbor;
 extern crate proteus;
-
-pub mod store;
-mod identity;
+extern crate cryptobox_store;
+extern crate cryptobox_filestore;
 
 use std::borrow::Cow;
 use std::error::Error;
@@ -28,13 +26,14 @@ use std::mem;
 use std::path::Path;
 use std::sync::Arc;
 
-pub use identity::{Identity, IdentityMode};
+pub use cryptobox_store::identity::{Identity, IdentityMode};
+pub use cryptobox_store::Store;
+
 use proteus::keys::{self, IdentityKeyPair, PreKey, PreKeyBundle, PreKeyId};
 use proteus::message::Envelope;
 use proteus::session::{PreKeyStore, Session};
 use proteus::{DecodeError, EncodeError};
-use store::Store;
-use store::file::{FileStore, FileStoreError};
+use cryptobox_filestore::{FileStore, FileStoreError};
 
 // CBox /////////////////////////////////////////////////////////////////////
 
@@ -90,7 +89,7 @@ impl CBox<FileStore> {
 }
 
 impl<S: Store> CBox<S> {
-    pub fn create(store: S) -> Result<CBox<S>, CBoxError<S>> where CBoxError<S>: std::convert::From<<S as store::Store>::Error> {
+    pub fn create(store: S) -> Result<CBox<S>, CBoxError<S>> where CBoxError<S>: std::convert::From<<S as Store>::Error> {
         let ident = match store.load_identity()? {
             Some(Identity::Sec(i)) => i.into_owned(),
             Some(Identity::Pub(_)) => return Err(CBoxError::IdentityError),

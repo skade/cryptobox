@@ -1,0 +1,9 @@
+[package]
+name = "cryptobox-filestore"
+version = "0.1.0"
+authors = ["Florian Gilcher <florian.gilcher@asquera.de>"]
+
+[dependencies]
+byteorder       = ">= 0.5.1"
+proteus         = { git = "https://github.com/wireapp/proteus", branch = "develop" }
+cryptobox-store = { path = "../cryptobox-store" }
