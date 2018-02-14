@@ -20,15 +20,12 @@ extern crate libc;
 extern crate proteus;
 
 use cryptobox::{CBox, CBoxError, CBoxSession, Identity, IdentityMode};
-use cryptobox::Store;
-use cryptobox_filestore::FileStore;
 use libc::{c_char, c_ushort, size_t, uint8_t, uint16_t};
 use proteus::{DecodeError, EncodeError};
 use proteus::keys::{self, PreKeyId, PreKeyBundle};
 use proteus::session;
 use std::borrow::Cow;
 use std::ffi::CStr;
-use std::fmt;
 use std::mem;
 use std::path::Path;
 use std::{slice, str, u16};
@@ -54,7 +51,7 @@ pub enum CBoxIdentityMode {
 
 #[no_mangle]
 pub extern
-fn cbox_file_open(c_path: *const c_char, out: *mut *mut CBox<FileStore>) -> CBoxResult {
+fn cbox_file_open(c_path: *const c_char, out: *mut *mut CBox) -> CBoxResult {
     catch_unwind(|| {
         let path = try_unwrap!(to_str(c_path, 4096));
         let cbox = try_unwrap!(CBox::file_open(&Path::new(path)));
@@ -69,7 +66,7 @@ fn cbox_file_open_with(c_path:   *const c_char,
                        c_id:     *const uint8_t,
                        c_id_len: size_t,
                        c_mode:   CBoxIdentityMode,
-                       out:      *mut *mut CBox<FileStore>) -> CBoxResult
+                       out:      *mut *mut CBox) -> CBoxResult
 {
     catch_unwind(|| {
         let path     = try_unwrap!(to_str(c_path, 4096));
@@ -89,7 +86,7 @@ fn cbox_file_open_with(c_path:   *const c_char,
 }
 
 #[no_mangle]
-pub extern fn cbox_close(b: *mut CBox<FileStore>) {
+pub extern fn cbox_close(b: *mut CBox) {
     debug_assert!(!b.is_null());
     catch_unwind(|| {
         unsafe { Box::from_raw(b); }
@@ -99,7 +96,7 @@ pub extern fn cbox_close(b: *mut CBox<FileStore>) {
 
 #[no_mangle]
 pub extern
-fn cbox_identity_copy(cbox: *const CBox<FileStore>, out: *mut *mut Vec<u8>) -> CBoxResult {
+fn cbox_identity_copy(cbox: *const CBox, out: *mut *mut Vec<u8>) -> CBoxResult {
     catch_unwind(|| {
         let i = try_unwrap!(Identity::Sec(Cow::Borrowed(ptr2ref(cbox).identity())).serialise());
         assign(out, Box::into_raw(Box::new(i)));
@@ -109,7 +106,7 @@ fn cbox_identity_copy(cbox: *const CBox<FileStore>, out: *mut *mut Vec<u8>) -> C
 
 #[no_mangle]
 pub extern
-fn cbox_session_save(b: *const CBox<FileStore>, s: *mut CBoxSession<FileStore>) -> CBoxResult {
+fn cbox_session_save(b: *const CBox, s: *mut CBoxSession) -> CBoxResult {
     catch_unwind(move || {
         try_unwrap!(ptr2ref(b).session_save(ptr2mut(s)));
         CBoxResult::Success
@@ -118,7 +115,7 @@ fn cbox_session_save(b: *const CBox<FileStore>, s: *mut CBoxSession<FileStore>) 
 
 #[no_mangle]
 pub extern
-fn cbox_session_delete(cbox: *const CBox<FileStore>, c_sid: *const c_char) -> CBoxResult {
+fn cbox_session_delete(cbox: *const CBox, c_sid: *const c_char) -> CBoxResult {
     catch_unwind(|| {
         let sid = try_unwrap!(to_str(c_sid, 1024));
         try_unwrap!(ptr2ref(cbox).session_delete(sid));
@@ -127,7 +124,7 @@ fn cbox_session_delete(cbox: *const CBox<FileStore>, c_sid: *const c_char) -> CB
 }
 
 #[no_mangle]
-pub extern fn cbox_random_bytes(_: *const CBox<FileStore>, n: size_t, out: *mut *mut Vec<u8>) -> CBoxResult {
+pub extern fn cbox_random_bytes(_: *const CBox, n: size_t, out: *mut *mut Vec<u8>) -> CBoxResult {
     catch_unwind(|| {
         assign(out, Box::into_raw(Box::new(keys::rand_bytes(n as usize))));
         CBoxResult::Success
@@ -141,7 +138,7 @@ pub static CBOX_LAST_PREKEY_ID: c_ushort = u16::MAX;
 
 #[no_mangle]
 pub extern
-fn cbox_new_prekey(cbox: *const CBox<FileStore>, pkid: uint16_t, out: *mut *mut Vec<u8>) -> CBoxResult {
+fn cbox_new_prekey(cbox: *const CBox, pkid: uint16_t, out: *mut *mut Vec<u8>) -> CBoxResult {
     catch_unwind(|| {
         let bundle = try_unwrap!(ptr2ref(cbox).new_prekey(PreKeyId::new(pkid)));
         let bytes  = try_unwrap!(bundle.serialise());
@@ -154,11 +151,11 @@ fn cbox_new_prekey(cbox: *const CBox<FileStore>, pkid: uint16_t, out: *mut *mut 
 
 #[no_mangle]
 pub extern fn cbox_session_init_from_prekey
-    (cbox:         *const CBox<FileStore>,
+    (cbox:         *const CBox,
      c_sid:        *const c_char,
      c_prekey:     *const uint8_t,
      c_prekey_len: size_t,
-     out:          *mut *mut CBoxSession<FileStore>) -> CBoxResult
+     out:          *mut *mut CBoxSession) -> CBoxResult
 {
     catch_unwind(|| {
         let sid     = try_unwrap!(to_str(c_sid, 1024));
@@ -171,11 +168,11 @@ pub extern fn cbox_session_init_from_prekey
 
 #[no_mangle]
 pub extern fn cbox_session_init_from_message
-    (cbox:         *const CBox<FileStore>,
+    (cbox:         *const CBox,
      c_sid:        *const c_char,
      c_cipher:     *const uint8_t,
      c_cipher_len: size_t,
-     c_sess:       *mut *mut CBoxSession<FileStore>,
+     c_sess:       *mut *mut CBoxSession,
      c_plain:      *mut *mut Vec<u8>) -> CBoxResult
 {
     catch_unwind(|| {
@@ -190,9 +187,9 @@ pub extern fn cbox_session_init_from_message
 
 #[no_mangle]
 pub extern fn cbox_session_load
-    (cbox:  *const CBox<FileStore>,
+    (cbox:  *const CBox,
      c_sid: *const c_char,
-     out:   *mut *mut CBoxSession<FileStore>) -> CBoxResult
+     out:   *mut *mut CBoxSession) -> CBoxResult
 {
     catch_unwind(|| {
         let sid     = try_unwrap!(to_str(c_sid, 1024));
@@ -206,7 +203,7 @@ pub extern fn cbox_session_load
 }
 
 #[no_mangle]
-pub extern fn cbox_session_close(b: *mut CBoxSession<FileStore>) {
+pub extern fn cbox_session_close(b: *mut CBoxSession) {
     debug_assert!(!b.is_null());
     catch_unwind(|| {
         unsafe { Box::from_raw(b); }
@@ -216,7 +213,7 @@ pub extern fn cbox_session_close(b: *mut CBoxSession<FileStore>) {
 
 #[no_mangle]
 pub extern fn cbox_encrypt
-    (session:     *mut CBoxSession<FileStore>,
+    (session:     *mut CBoxSession,
      c_plain:     *const uint8_t,
      c_plain_len: size_t,
      out:         *mut *mut Vec<u8>) -> CBoxResult
@@ -231,7 +228,7 @@ pub extern fn cbox_encrypt
 
 #[no_mangle]
 pub extern fn cbox_decrypt
-    (session:      *mut CBoxSession<FileStore>,
+    (session:      *mut CBoxSession,
      c_cipher:     *const uint8_t,
      c_cipher_len: size_t,
      out:          *mut *mut Vec<u8>) -> CBoxResult
@@ -246,7 +243,7 @@ pub extern fn cbox_decrypt
 
 #[no_mangle]
 pub extern
-fn cbox_fingerprint_local(b: *const CBox<FileStore>, out: *mut *mut Vec<u8>) -> CBoxResult {
+fn cbox_fingerprint_local(b: *const CBox, out: *mut *mut Vec<u8>) -> CBoxResult {
     catch_unwind(|| {
         let fp = ptr2ref(b).fingerprint().into_bytes();
         assign(out, Box::into_raw(Box::new(fp)));
@@ -256,7 +253,7 @@ fn cbox_fingerprint_local(b: *const CBox<FileStore>, out: *mut *mut Vec<u8>) -> 
 
 #[no_mangle]
 pub extern
-fn cbox_fingerprint_remote(session: *const CBoxSession<FileStore>, out: *mut *mut Vec<u8>) -> CBoxResult {
+fn cbox_fingerprint_remote(session: *const CBoxSession, out: *mut *mut Vec<u8>) -> CBoxResult {
     catch_unwind(|| {
         let fp = ptr2ref(session).fingerprint_remote().into_bytes();
         assign(out, Box::into_raw(Box::new(fp)));
@@ -361,8 +358,8 @@ pub enum CBoxResult {
     DegeneratedKey        = 17
 }
 
-impl<S: Store + fmt::Debug> From<CBoxError<S>> for CBoxResult {
-    fn from(e: CBoxError<S>) -> CBoxResult {
+impl From<CBoxError> for CBoxResult {
+    fn from(e: CBoxError) -> CBoxResult {
         let _ = log::error(&e);
         match e {
             CBoxError::ProteusError(session::Error::RemoteIdentityChanged) => CBoxResult::RemoteIdentityChanged,

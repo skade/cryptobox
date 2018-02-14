@@ -18,22 +18,22 @@ extern crate cbor;
 
 pub mod identity;
 
-use std::borrow::Borrow;
 use identity::Identity;
 use proteus::keys::{IdentityKeyPair, PreKey, PreKeyId};
 use proteus::session::Session;
+use std::sync::Arc;
+
+pub type Result<T> = std::result::Result<T, Box<::std::error::Error>>;
 
 pub trait Store {
-    type Error: ::std::error::Error;
+    fn load_session(&self, li: Arc<IdentityKeyPair>, id: &str) -> Result<Option<Session<Arc<IdentityKeyPair>>>>;
+    fn save_session(&self, id: &str, s: &Session<Arc<IdentityKeyPair>>) -> Result<()>;
+    fn delete_session(&self, id: &str) -> Result<()>;
 
-    fn load_session<I: Borrow<IdentityKeyPair>>(&self, li: I, id: &str) -> Result<Option<Session<I>>, Self::Error>;
-    fn save_session<I: Borrow<IdentityKeyPair>>(&self, id: &str, s: &Session<I>) -> Result<(), Self::Error>;
-    fn delete_session(&self, id: &str) -> Result<(), Self::Error>;
+    fn load_identity(&self) -> Result<Option<Identity>>;
+    fn save_identity(&self, id: &Identity) -> Result<()>;
 
-    fn load_identity<'s>(&self) -> Result<Option<Identity<'s>>, Self::Error>;
-    fn save_identity(&self, id: &Identity) -> Result<(), Self::Error>;
-
-    fn load_prekey(&self, id: PreKeyId) -> Result<Option<PreKey>, Self::Error>;
-    fn add_prekey(&self, key: &PreKey) -> Result<(), Self::Error>;
-    fn delete_prekey(&self, id: PreKeyId) -> Result<(), Self::Error>;
+    fn load_prekey(&self, id: PreKeyId) -> Result<Option<PreKey>>;
+    fn add_prekey(&self, key: &PreKey) -> Result<()>;
+    fn delete_prekey(&self, id: PreKeyId) -> Result<()>;
 }
